@@ -14,8 +14,6 @@ on:
     secrets:
       AZURE_CREDENTIALS:
         required: true
-      GITHUB_TOKEN:
-        required: true
 
 jobs:
   destroy:
