@@ -5,6 +5,11 @@ run-name: ${{ github.workflow }}
 on:
   workflow_call:
     inputs:
+      enable_harder_runner:
+        description: "Specify whether to enable the Harden Runner action (only on public repositories)"
+        default: false
+        required: true
+        type: boolean
       template_dir:
         description: "Specify repository path of the bicep directory"
         default: bicep
@@ -16,16 +21,19 @@ on:
         required: true
         type: string
       deploy_jumpbox:
-        description: "Specify whether the infrastructure deployed contains a jumpbox virtual machine"
+        description: "Specify whether the infrastructure deployed contains a jumpbox virtual machine (also set password param name and value)"
         required: true
         type: boolean
-      jumpbox_pass_param_name:
+      jumpbox_password_param_name:
         description: "Specify the parameter name for the jumpbox admin's password"
         required: false
-        default:  
+        type: string
+      jumpbox_password:
+        description: "Specify the jumpbox admin's password"
+        required: false
         type: string
       location:
-        description: "Define the location to store the deployment metadata"
+        description: "Specify the location to store the deployment metadata"
         default: westeurope
         required: true
         type: string
@@ -36,8 +44,6 @@ on:
     secrets:
       AZURE_CREDENTIALS:
         required: true
-      JUMPBOX_ADMIN_PASSWORD:
-        required: false
 
 jobs:
   deploy:
@@ -47,6 +53,13 @@ jobs:
       run:
         shell: bash
     steps:
+      - name: Harden Runner
+        if: inputs.enable_harder_runner
+        uses: step-security/harden-runner@v2.0.0
+        with:
+          disable-sudo: true
+          egress-policy: audit
+
       - name: Checkout
         uses: actions/checkout@v3
 
@@ -69,22 +82,43 @@ jobs:
             --template-file ${{ inputs.template_prefix }}.bicep \
             --parameters ${{ inputs.template_prefix }}.parameters.json
 
-      - name: Deploy template
-        working-directory: ${{ github.workspace }}/${{ inputs.template_dir }}
-        if: inputs.deploy_jumpbox
-        run: |
-          az deployment sub create \
-            --name "${{ inputs.deployment_name }}" \
-            --location "${{ inputs.location }}" \
-            --template-file ${{ inputs.template_prefix }}.bicep \
-            --parameters ${{ inputs.template_prefix }}.parameters.json
-      - name: Deploy template
-        working-directory: ${{ github.workspace }}/${{ inputs.template_dir }}
-        if: inputs.deploy_jumpbox
-        run: |
-          az deployment sub create \
-            --name "${{ inputs.deployment_name }}" \
-            --location "${{ inputs.location }}" \
-            --template-file ${{ inputs.template_prefix }}.bicep \
-            --parameters ${{ inputs.template_prefix }}.parameters.json
+      # - name: Deploy template
+      #   working-directory: ${{ github.workspace }}/${{ inputs.template_dir }}
+      #   if: ! inputs.deploy_jumpbox
+      #   run: |
+      #     az deployment sub create \
+      #       --name "${{ inputs.deployment_name }}" \
+      #       --location "${{ inputs.location }}" \
+      #       --template-file ${{ inputs.template_prefix }}.bicep \
+      #       --parameters ${{ inputs.template_prefix }}.parameters.json
+      - name: List public repo's
+        uses: actions/github-script@v6
+        with:
+          script: |
+            octokit.rest.repos.listPublic();
 
+      - name: Validate no jumpbox
+        if: inputs.deploy_jumpbox
+        run: echo "no jumpbox"
+
+      - name: Validate with jumpbox
+        if: ! inputs.deploy_jumpbox
+        run: echo "with jumpbox"
+
+      - name: Validate password's existence
+        if: inputs.deploy_jumpbox && ( inputs.jumpbox_password_param_name == '' || inputs.jumpbox_password == '' )
+        uses: actions/github-script@v6
+        with:
+          script: |
+            core.setFailed('Both the jumpbox_password_param_name and the jumpbox_password must be different than ""')
+
+      # - name: Deploy template
+      #   working-directory: ${{ github.workspace }}/${{ inputs.template_dir }}
+      #   if: inputs.deploy_jumpbox
+      #   run: |
+      #     az deployment sub create \
+      #       --name "${{ inputs.deployment_name }}" \
+      #       --location "${{ inputs.location }}" \
+      #       --template-file ${{ inputs.template_prefix }}.bicep \
+      #       --parameters ${{ inputs.template_prefix }}.parameters.json \
+      #                   "${{ inputs.jumpbox_password_param_name }}=${{ inputs.jumpbox_password }}"
