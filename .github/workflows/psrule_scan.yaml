@@ -5,12 +5,12 @@ run-name: ${{ github.workflow }}
 on:
   workflow_call:
     template_dir:
-      description: "Define repository path of the bicep directory"
+      description: "Define repository path of the bicep directory. Default is 'bicep'"
       default: bicep
       required: true
       type: string
     template_prefix:
-      description: "Define file prefix of the main bicep template"
+      description: "Define file prefix of the main bicep template. Default is 'azure.deploy'"
       default: azure.deploy
       required: true
 
