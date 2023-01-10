@@ -1,20 +1,17 @@
 name: checkov-scan
-
 run-name: ${{ github.workflow }}
-
 on:
   workflow_call:
     inputs:
       template_dir:
-        description: "Specify repository path of the bicep directory. Default is 'bicep'"
-        default: bicep
+        description: "Specify repository path of the bicep directory"
         required: true
         type: string
       template_prefix:
-        description: "Specify file prefix of the main bicep template. Default is 'azure.deploy'"
-        default: azure.deploy
+        description: "Specify file prefix of the main bicep template"
         required: true
         type: string
+
 jobs:
   scan-and-publish:
     name: Scan bicep and publish results
@@ -41,17 +38,25 @@ jobs:
           file: ${{ inputs.template_dir }}/${{ inputs.template_prefix }}.json
           framework: arm
           soft_fail: false
-          output_format: sarif
+          output_format: junitxml
 
       - name: Write results to file
         if: always()
         run: |
-          echo "$CHECKOV_RESULTS" > results.sarif
+          echo "$CHECKOV_RESULTS" > results.xml
 
       - name: Upload results as artifact
         uses: actions/upload-artifact@v3
         if: always()
         with:
           name: scan-results
-          path: results.sarif
+          path: results.xml
           retention-days: 30
+
+      - name: Publish Scan Results
+        uses: mikepenz/action-junit-report@v3
+        if: always()
+        with:
+          check_name: Checkov Scan Results
+          report_paths: results.xml
+          detailed_summary: true

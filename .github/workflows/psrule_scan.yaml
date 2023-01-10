@@ -1,18 +1,14 @@
 name: psrule-scan
-
 run-name: ${{ github.workflow }}
-
 on:
   workflow_call:
     inputs:
       template_dir:
-        description: "Specify repository path of the bicep directory. Default is 'bicep'"
-        default: bicep
+        description: "Specify repository path of the bicep directory"
         required: true
         type: string
       template_prefix:
-        description: "Specify file prefix of the main bicep template. Default is 'azure.deploy'"
-        default: azure.deploy
+        description: "Specify file prefix of the main bicep template"
         required: true
         type: string
 

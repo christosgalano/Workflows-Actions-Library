@@ -1,7 +1,5 @@
 name: destroy-infra
-
 run-name: ${{ github.workflow }}
-
 on:
   workflow_call:
     inputs:
