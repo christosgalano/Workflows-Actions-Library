@@ -18,18 +18,6 @@ on:
         default: azure.deploy
         required: true
         type: string
-      deploy_jumpbox:
-        description: "Specify whether the infrastructure deployed contains a jumpbox virtual machine (also set password param name and value)"
-        required: true
-        type: boolean
-      jumpbox_password_param_name:
-        description: "Specify the parameter name for the jumpbox admin's password"
-        required: false
-        type: string
-      jumpbox_password:
-        description: "Specify the jumpbox admin's password"
-        required: false
-        type: string
       location:
         description: "Specify the location to store the deployment metadata"
         default: westeurope
@@ -66,19 +54,19 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Lint template
-        working-directory: ${{ github.workspace }}/${{ inputs.template_dir }}
-        run: |
-          az bicep build --file ${{ inputs.template_prefix }}.bicep
+      # - name: Lint template
+      #   working-directory: ${{ github.workspace }}/${{ inputs.template_dir }}
+      #   run: |
+      #     az bicep build --file ${{ inputs.template_prefix }}.bicep
 
-      - name: Validate template
-        working-directory: ${{ github.workspace }}/${{ inputs.template_dir }}
-        run: |
-          az deployment sub validate \
-            --name "${{ inputs.deployment_name }}" \
-            --location "${{ inputs.location }}" \
-            --template-file ${{ inputs.template_prefix }}.bicep \
-            --parameters ${{ inputs.template_prefix }}.parameters.json
+      # - name: Validate template
+      #   working-directory: ${{ github.workspace }}/${{ inputs.template_dir }}
+      #   run: |
+      #     az deployment sub validate \
+      #       --name "${{ inputs.deployment_name }}" \
+      #       --location "${{ inputs.location }}" \
+      #       --template-file ${{ inputs.template_prefix }}.bicep \
+      #       --parameters ${{ inputs.template_prefix }}.parameters.json
 
       # - name: Deploy template
       #   working-directory: ${{ github.workspace }}/${{ inputs.template_dir }}
@@ -90,34 +78,10 @@ jobs:
       #       --template-file ${{ inputs.template_prefix }}.bicep \
       #       --parameters ${{ inputs.template_prefix }}.parameters.json
 
-      - name: Validate no jumpbox
-        if: inputs.deploy_jumpbox
-        run: echo "no jumpbox"
-
-      - name: Validate with jumpbox
-        if: inputs.deploy_jumpbox == 'false'
-        run: echo "with jumpbox"
-
       - name: List public repo's
         uses: actions/github-script@v6
         with:
           script: |
-            github.rest.repos.listPublic();
-
-      # - name: Validate password's existence
-      #   if: inputs.deploy_jumpbox == 'true' && ( inputs.jumpbox_password_param_name == '' || inputs.jumpbox_password == '' )
-      #   uses: actions/github-script@v6
-      #   with:
-      #     script: |
-      #       core.setFailed('Both the jumpbox_password_param_name and the jumpbox_password must be different than ""')
-
-      # - name: Deploy template
-      #   working-directory: ${{ github.workspace }}/${{ inputs.template_dir }}
-      #   if: inputs.deploy_jumpbox == 'true'
-      #   run: |
-      #     az deployment sub create \
-      #       --name "${{ inputs.deployment_name }}" \
-      #       --location "${{ inputs.location }}" \
-      #       --template-file ${{ inputs.template_prefix }}.bicep \
-      #       --parameters ${{ inputs.template_prefix }}.parameters.json \
-      #                   ${{ inputs.jumpbox_password_param_name }}="${{ inputs.jumpbox_password }}"
+            github.rest.repos.listForUser({
+              christosgalano,
+            });
