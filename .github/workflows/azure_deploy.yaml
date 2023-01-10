@@ -84,7 +84,7 @@ jobs:
 
       # - name: Deploy template
       #   working-directory: ${{ github.workspace }}/${{ inputs.template_dir }}
-      #   if: ! inputs.deploy_jumpbox
+      #   if: inputs.deploy_jumpbox == 'false'
       #   run: |
       #     az deployment sub create \
       #       --name "${{ inputs.deployment_name }}" \
@@ -106,7 +106,7 @@ jobs:
         run: echo "with jumpbox"
 
       # - name: Validate password's existence
-      #   if: inputs.deploy_jumpbox && ( inputs.jumpbox_password_param_name == '' || inputs.jumpbox_password == '' )
+      #   if: inputs.deploy_jumpbox == 'true' && ( inputs.jumpbox_password_param_name == '' || inputs.jumpbox_password == '' )
       #   uses: actions/github-script@v6
       #   with:
       #     script: |
@@ -114,7 +114,7 @@ jobs:
 
       # - name: Deploy template
       #   working-directory: ${{ github.workspace }}/${{ inputs.template_dir }}
-      #   if: inputs.deploy_jumpbox
+      #   if: inputs.deploy_jumpbox == 'true'
       #   run: |
       #     az deployment sub create \
       #       --name "${{ inputs.deployment_name }}" \
