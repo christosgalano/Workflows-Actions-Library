@@ -31,7 +31,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      # When testing the bicep templates directly, the modules are not included.
       - name: Bicep Build
         uses: Azure/bicep-build-action@v1.0.0
         with:
