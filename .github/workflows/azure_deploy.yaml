@@ -3,11 +3,6 @@ run-name: ${{ github.workflow }}
 on:
   workflow_call:
     inputs:
-      # enable_harder_runner:
-      #   description: "Specify whether to enable the Harden Runner action (only on public repositories)"
-      #   default: false
-      #   required: true
-      #   type: boolean
       template_dir:
         description: "Specify repository path of the bicep directory"
         default: bicep
@@ -27,6 +22,10 @@ on:
         description: "Specify deployment name"
         required: true
         type: string
+      enable_harder_runner:
+        description: "Specify whether to enable the Harden Runner action (only on public repositories)"
+        required: true
+        type: boolean
     secrets:
       AZURE_CREDENTIALS:
         required: true
@@ -39,49 +38,40 @@ jobs:
       run:
         shell: bash
     steps:
-      # - name: Harden Runner
-      #   if: inputs.enable_harder_runner
-      #   uses: step-security/harden-runner@v2.0.0
-      #   with:
-      #     disable-sudo: true
-      #     egress-policy: audit
-
-      # - name: Checkout
-      #   uses: actions/checkout@v3
-
-      # - name: Azure login
-      #   uses: Azure/login@v1
-      #   with:
-      #     creds: ${{ secrets.AZURE_CREDENTIALS }}
-
-      # - name: Lint template
-      #   working-directory: ${{ github.workspace }}/${{ inputs.template_dir }}
-      #   run: |
-      #     az bicep build --file ${{ inputs.template_prefix }}.bicep
-
-      # - name: Validate template
-      #   working-directory: ${{ github.workspace }}/${{ inputs.template_dir }}
-      #   run: |
-      #     az deployment sub validate \
-      #       --name "${{ inputs.deployment_name }}" \
-      #       --location "${{ inputs.location }}" \
-      #       --template-file ${{ inputs.template_prefix }}.bicep \
-      #       --parameters ${{ inputs.template_prefix }}.parameters.json
-
-      # - name: Deploy template
-      #   working-directory: ${{ github.workspace }}/${{ inputs.template_dir }}
-      #   if: inputs.deploy_jumpbox == 'false'
-      #   run: |
-      #     az deployment sub create \
-      #       --name "${{ inputs.deployment_name }}" \
-      #       --location "${{ inputs.location }}" \
-      #       --template-file ${{ inputs.template_prefix }}.bicep \
-      #       --parameters ${{ inputs.template_prefix }}.parameters.json
-
-      - name: List public repo's
-        uses: actions/github-script@v6
+      - name: Harden Runner
+        if: inputs.enable_harder_runner == 'true'
+        uses: step-security/harden-runner@v2.0.0
         with:
-          script: |
-            github.rest.repos.listForUser({
-              christosgalano,
-            });
+          disable-sudo: true
+          egress-policy: audit
+
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Azure login
+        uses: Azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Lint template
+        working-directory: ${{ github.workspace }}/${{ inputs.template_dir }}
+        run: |
+          az bicep build --file ${{ inputs.template_prefix }}.bicep
+
+      - name: Validate template
+        working-directory: ${{ github.workspace }}/${{ inputs.template_dir }}
+        run: |
+          az deployment sub validate \
+            --name "${{ inputs.deployment_name }}" \
+            --location "${{ inputs.location }}" \
+            --template-file ${{ inputs.template_prefix }}.bicep \
+            --parameters ${{ inputs.template_prefix }}.parameters.json
+
+      - name: Deploy template
+        working-directory: ${{ github.workspace }}/${{ inputs.template_dir }}
+        run: |
+          az deployment sub create \
+            --name "${{ inputs.deployment_name }}" \
+            --location "${{ inputs.location }}" \
+            --template-file ${{ inputs.template_prefix }}.bicep \
+            --parameters ${{ inputs.template_prefix }}.parameters.json

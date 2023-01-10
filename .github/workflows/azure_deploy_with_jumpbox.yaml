@@ -30,6 +30,10 @@ on:
         description: "Specify deployment name"
         required: true
         type: string
+      enable_harder_runner:
+        description: "Specify whether to enable the Harden Runner action (only on public repositories)"
+        required: true
+        type: boolean
     secrets:
       AZURE_CREDENTIALS:
         required: true
@@ -42,6 +46,13 @@ jobs:
       run:
         shell: bash
     steps:
+      - name: Harden Runner
+        if: inputs.enable_harder_runner == 'true'
+        uses: step-security/harden-runner@v2.0.0
+        with:
+          disable-sudo: true
+          egress-policy: audit
+
       - name: Checkout
         uses: actions/checkout@v3
 
