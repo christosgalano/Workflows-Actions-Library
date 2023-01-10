@@ -102,7 +102,7 @@ jobs:
         run: echo "no jumpbox"
 
       - name: Validate with jumpbox
-        if: ! inputs.deploy_jumpbox
+        if: inputs.deploy_jumpbox == 'false'
         run: echo "with jumpbox"
 
       # - name: Validate password's existence
