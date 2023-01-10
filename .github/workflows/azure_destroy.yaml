@@ -15,10 +15,10 @@ on:
 
 jobs:
   destroy:
-    name: Destroy Infrastructure
+    name: Destroy infrastructure
     runs-on: ubuntu-latest
     steps:
-      - name: Azure Login
+      - name: Azure login
         uses: Azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}

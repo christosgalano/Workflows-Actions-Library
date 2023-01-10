@@ -47,7 +47,7 @@ jobs:
           path: results.xml
           retention-days: 30
 
-      - name: Publish Scan Results
+      - name: Publish scan results
         uses: EnricoMi/publish-unit-test-result-action/composite@v2
         with:
           check_name: PSRule Scan Results
