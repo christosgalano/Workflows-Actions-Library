@@ -17,10 +17,6 @@ on:
         description: "Specify the parameter name for the jumpbox admin's password"
         required: true
         type: string
-      jumpbox_password:
-        description: "Specify the jumpbox admin's password"
-        required: true
-        type: string
       location:
         description: "Specify the location to store the deployment metadata"
         default: westeurope
@@ -36,6 +32,8 @@ on:
         type: boolean
     secrets:
       AZURE_CREDENTIALS:
+        required: true
+      ADMIN_PASSWORD:
         required: true
 
 jobs:
@@ -84,4 +82,4 @@ jobs:
             --location "${{ inputs.location }}" \
             --template-file ${{ inputs.template_prefix }}.bicep \
             --parameters ${{ inputs.template_prefix }}.parameters.json \
-                         ${{ inputs.jumpbox_password_param_name }}="${{ inputs.jumpbox_password }}"
+                         ${{ inputs.jumpbox_password_param_name }}="${{ secrets.ADMIN_PASSWORD }}"
