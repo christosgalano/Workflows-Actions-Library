@@ -6,27 +6,38 @@ on:
   workflow_call:
     inputs:
       template_dir:
-        description: "Define repository path of the bicep directory"
+        description: "Specify repository path of the bicep directory"
         default: bicep
         required: true
         type: string
       template_prefix:
-        description: "Define file prefix of the main bicep template"
+        description: "Specify file prefix of the main bicep template"
         default: azure.deploy
         required: true
         type: string
+      deploy_jumpbox:
+        description: "Specify whether the infrastructure deployed contains a jumpbox virtual machine"
+        required: true
+        type: boolean
+      jumpbox_pass_param_name:
+        description: "Specify the parameter name for the jumpbox admin's password"
+        required: false
+        default:  
+        type: string
       location:
-        description: "The location to store the deployment metadata"
+        description: "Define the location to store the deployment metadata"
         default: westeurope
         required: true
         type: string
       deployment_name:
-        description: "Define deployment name"
+        description: "Specify deployment name"
         required: true
         type: string
     secrets:
       AZURE_CREDENTIALS:
         required: true
+      JUMPBOX_ADMIN_PASSWORD:
+        required: false
 
 jobs:
   deploy:
@@ -58,11 +69,22 @@ jobs:
             --template-file ${{ inputs.template_prefix }}.bicep \
             --parameters ${{ inputs.template_prefix }}.parameters.json
 
-      # - name: Deploy template
-      #   working-directory: ${{ github.workspace }}/${{ inputs.template_dir }}
-      #   run: |
-      #     az deployment sub create \
-      #       --name "${{ inputs.deployment_name }}" \
-      #       --location "${{ inputs.location }}" \
-      #       --template-file ${{ inputs.template_prefix }}.bicep \
-      #       --parameters ${{ inputs.template_prefix }}.parameters.json
+      - name: Deploy template
+        working-directory: ${{ github.workspace }}/${{ inputs.template_dir }}
+        if: inputs.deploy_jumpbox
+        run: |
+          az deployment sub create \
+            --name "${{ inputs.deployment_name }}" \
+            --location "${{ inputs.location }}" \
+            --template-file ${{ inputs.template_prefix }}.bicep \
+            --parameters ${{ inputs.template_prefix }}.parameters.json
+      - name: Deploy template
+        working-directory: ${{ github.workspace }}/${{ inputs.template_dir }}
+        if: inputs.deploy_jumpbox
+        run: |
+          az deployment sub create \
+            --name "${{ inputs.deployment_name }}" \
+            --location "${{ inputs.location }}" \
+            --template-file ${{ inputs.template_prefix }}.bicep \
+            --parameters ${{ inputs.template_prefix }}.parameters.json
+

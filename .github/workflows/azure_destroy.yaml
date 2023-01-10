@@ -6,7 +6,7 @@ on:
   workflow_call:
     inputs:
       rg_name:
-        description: "Define resource group name"
+        description: "Specify resource group name"
         required: true
         type: string
     secrets:
