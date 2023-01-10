@@ -14,6 +14,8 @@ on:
     secrets:
       AZURE_CREDENTIALS:
         required: true
+      GITHUB_TOKEN:
+        required: true
 
 jobs:
   destroy:
@@ -36,4 +38,6 @@ jobs:
         uses: Azure/cli@v1
         with:
           inlineScript: |
-            az group delete -n ${{ inputs.rg_name }} -y
+            az group show -n ${{ inputs.rg_name }}
+
+# az group delete -n ${{ inputs.rg_name }} -y
