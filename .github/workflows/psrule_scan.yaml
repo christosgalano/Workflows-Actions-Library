@@ -56,6 +56,7 @@ jobs:
 
       - name: Publish scan results
         uses: EnricoMi/publish-unit-test-result-action/composite@v2
+        if: always()
         with:
           check_name: PSRule Scan Results
           nunit_files: results.xml
