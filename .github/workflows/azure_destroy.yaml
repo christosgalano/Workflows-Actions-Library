@@ -1,0 +1,30 @@
+name: destroy-infra
+
+run-name: ${{ github.workflow }}
+
+on:
+  workflow_call:
+    inputs:
+      rg_name:
+        description: "Define resource group name"
+        required: true
+        type: string
+    secrets:
+      AZURE_CREDENTIALS:
+        required: true
+
+jobs:
+  destroy:
+    name: Destroy Infrastructure
+    runs-on: ubuntu-latest
+    steps:
+      - name: Azure Login
+        uses: Azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Delete the resource group and all of its resources
+        uses: Azure/cli@v1
+        with:
+          inlineScript: |
+            az group delete -n ${{ inputs.rg_name }} -y

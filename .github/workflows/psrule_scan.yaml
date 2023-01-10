@@ -1,0 +1,52 @@
+name: psrule-scan
+
+run-name: ${{ github.workflow }}
+
+on:
+  workflow_call:
+    template_dir:
+      description: "Define repository path of the bicep directory"
+      default: bicep
+      required: true
+      type: string
+    template_prefix:
+      description: "Define file prefix of the main bicep template"
+      default: azure.deploy
+      required: true
+
+jobs:
+  scan-and-publish:
+    name: Scan Bicep
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      # When testing the bicep templates directly, the modules are not included.
+      - name: Bicep Build
+        uses: Azure/bicep-build-action@v1.0.0
+        with:
+          bicepFilePath: ${{ inputs.template_dir }}/${{ inputs.template_prefix }}.bicep
+          outputFilePath: ${{ inputs.template_dir }}/${{ inputs.template_prefix }}.json
+
+      - name: Run PSRule scan
+        uses: microsoft/ps-rule@v2.5.2
+        with:
+          modules: "PSRule.Rules.Azure"
+          inputPath: ${{ inputs.template_dir }}/${{ inputs.template_prefix }}*.json
+          outputFormat: NUnit3
+          outputPath: results.xml
+
+      - name: Upload results as artifact
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: scan-results
+          path: results.xml
+          retention-days: 30
+
+      - name: Publish Scan Results
+        uses: EnricoMi/publish-unit-test-result-action/composite@v2
+        with:
+          check_name: PSRule Scan Results
+          nunit_files: results.xml

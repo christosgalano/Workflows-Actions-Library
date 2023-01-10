@@ -1,0 +1,68 @@
+name: deploy-infra
+
+run-name: ${{ github.workflow }}
+
+on:
+  workflow_call:
+    inputs:
+      template_dir:
+        description: "Define repository path of the bicep directory"
+        default: bicep
+        required: true
+        type: string
+      template_prefix:
+        description: "Define file prefix of the main bicep template"
+        default: azure.deploy
+        required: true
+        type: string
+      location:
+        description: "The location to store the deployment metadata"
+        default: westeurope
+        required: true
+        type: string
+      deployment_name:
+        description: "Define deployment name"
+        required: true
+        type: string
+    secrets:
+      AZURE_CREDENTIALS:
+        required: true
+
+jobs:
+  deploy:
+    name: Deploy infrastructure
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Azure Login
+        uses: Azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Lint template
+        working-directory: ${{ github.workspace }}/${{ inputs.template_dir }}
+        run: |
+          az bicep build --file ${{ inputs.template_prefix }}.bicep
+
+      - name: Validate template
+        working-directory: ${{ github.workspace }}/${{ inputs.template_dir }}
+        run: |
+          az deployment sub validate \
+            --name "${{ inputs.deployment_name }}" \
+            --location "${{ inputs.location }}" \
+            --template-file ${{ inputs.template_prefix }}.bicep \
+            --parameters ${{ inputs.template_prefix }}.parameters.json
+
+      - name: Deploy template
+        working-directory: ${{ github.workspace }}/${{ inputs.template_dir }}
+        run: |
+          az deployment sub create \
+            --name "${{ inputs.deployment_name }}" \
+            --location "${{ inputs.location }}" \
+            --template-file ${{ inputs.template_prefix }}.bicep \
+            --parameters ${{ inputs.template_prefix }}.parameters.json
