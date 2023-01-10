@@ -64,7 +64,7 @@ jobs:
           path: results.xml
           retention-days: 30
 
-      - name: Scan Results
+      - name: Publish scan results
         uses: mikepenz/action-junit-report@v3
         if: always()
         with:
