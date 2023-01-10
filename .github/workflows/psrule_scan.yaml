@@ -39,7 +39,7 @@ jobs:
           outputFilePath: ${{ inputs.template_dir }}/${{ inputs.template_prefix }}.json
 
       - name: Run PSRule scan
-        uses: microsoft/ps-rule@v2.5.2
+        uses: microsoft/ps-rule@v2.6.0
         with:
           modules: "PSRule.Rules.Azure"
           inputPath: ${{ inputs.template_dir }}/${{ inputs.template_prefix }}*.json
