@@ -59,3 +59,10 @@ jobs:
         with:
           check_name: PSRule Scan Results
           nunit_files: results.xml
+          comment_mode: off
+          fail_on: test failures
+          action_fail: false
+          ignore_runs: false
+          job_summary: true
+          compare_to_earlier_commit: true
+          check_run_annotations: all tests, skipped tests
