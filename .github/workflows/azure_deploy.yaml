@@ -5,11 +5,11 @@ run-name: ${{ github.workflow }}
 on:
   workflow_call:
     inputs:
-      enable_harder_runner:
-        description: "Specify whether to enable the Harden Runner action (only on public repositories)"
-        default: false
-        required: true
-        type: boolean
+      # enable_harder_runner:
+      #   description: "Specify whether to enable the Harden Runner action (only on public repositories)"
+      #   default: false
+      #   required: true
+      #   type: boolean
       template_dir:
         description: "Specify repository path of the bicep directory"
         default: bicep
@@ -53,12 +53,12 @@ jobs:
       run:
         shell: bash
     steps:
-      - name: Harden Runner
-        if: inputs.enable_harder_runner
-        uses: step-security/harden-runner@v2.0.0
-        with:
-          disable-sudo: true
-          egress-policy: audit
+      # - name: Harden Runner
+      #   if: inputs.enable_harder_runner
+      #   uses: step-security/harden-runner@v2.0.0
+      #   with:
+      #     disable-sudo: true
+      #     egress-policy: audit
 
       - name: Checkout
         uses: actions/checkout@v3
@@ -105,12 +105,12 @@ jobs:
         if: ! inputs.deploy_jumpbox
         run: echo "with jumpbox"
 
-      - name: Validate password's existence
-        if: inputs.deploy_jumpbox && ( inputs.jumpbox_password_param_name == '' || inputs.jumpbox_password == '' )
-        uses: actions/github-script@v6
-        with:
-          script: |
-            core.setFailed('Both the jumpbox_password_param_name and the jumpbox_password must be different than ""')
+      # - name: Validate password's existence
+      #   if: inputs.deploy_jumpbox && ( inputs.jumpbox_password_param_name == '' || inputs.jumpbox_password == '' )
+      #   uses: actions/github-script@v6
+      #   with:
+      #     script: |
+      #       core.setFailed('Both the jumpbox_password_param_name and the jumpbox_password must be different than ""')
 
       # - name: Deploy template
       #   working-directory: ${{ github.workspace }}/${{ inputs.template_dir }}
@@ -121,4 +121,4 @@ jobs:
       #       --location "${{ inputs.location }}" \
       #       --template-file ${{ inputs.template_prefix }}.bicep \
       #       --parameters ${{ inputs.template_prefix }}.parameters.json \
-      #                   "${{ inputs.jumpbox_password_param_name }}=${{ inputs.jumpbox_password }}"
+      #                   ${{ inputs.jumpbox_password_param_name }}="${{ inputs.jumpbox_password }}"
