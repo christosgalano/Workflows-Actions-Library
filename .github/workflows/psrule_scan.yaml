@@ -18,7 +18,7 @@ on:
 
 jobs:
   scan-and-publish:
-    name: Scan Bicep
+    name: Scan bicep and publish results
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
