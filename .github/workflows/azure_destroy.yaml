@@ -36,6 +36,4 @@ jobs:
         uses: Azure/cli@v1
         with:
           inlineScript: |
-            az group show -n ${{ inputs.rg_name }}
-
-# az group delete -n ${{ inputs.rg_name }} -y
+            az group delete -n ${{ inputs.rg_name }} -y
