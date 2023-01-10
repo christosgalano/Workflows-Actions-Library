@@ -58,11 +58,11 @@ jobs:
             --template-file ${{ inputs.template_prefix }}.bicep \
             --parameters ${{ inputs.template_prefix }}.parameters.json
 
-      - name: Deploy template
-        working-directory: ${{ github.workspace }}/${{ inputs.template_dir }}
-        run: |
-          az deployment sub create \
-            --name "${{ inputs.deployment_name }}" \
-            --location "${{ inputs.location }}" \
-            --template-file ${{ inputs.template_prefix }}.bicep \
-            --parameters ${{ inputs.template_prefix }}.parameters.json
+      # - name: Deploy template
+      #   working-directory: ${{ github.workspace }}/${{ inputs.template_dir }}
+      #   run: |
+      #     az deployment sub create \
+      #       --name "${{ inputs.deployment_name }}" \
+      #       --location "${{ inputs.location }}" \
+      #       --template-file ${{ inputs.template_prefix }}.bicep \
+      #       --parameters ${{ inputs.template_prefix }}.parameters.json
