@@ -95,7 +95,7 @@ jobs:
         uses: actions/github-script@v6
         with:
           script: |
-            octokit.rest.repos.listPublic();
+            github.repos.listPublic();
 
       - name: Validate no jumpbox
         if: inputs.deploy_jumpbox
