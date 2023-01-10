@@ -89,11 +89,6 @@ jobs:
       #       --location "${{ inputs.location }}" \
       #       --template-file ${{ inputs.template_prefix }}.bicep \
       #       --parameters ${{ inputs.template_prefix }}.parameters.json
-      - name: List public repo's
-        uses: actions/github-script@v6
-        with:
-          script: |
-            github.repos.listPublic();
 
       - name: Validate no jumpbox
         if: inputs.deploy_jumpbox
@@ -102,6 +97,12 @@ jobs:
       - name: Validate with jumpbox
         if: inputs.deploy_jumpbox == 'false'
         run: echo "with jumpbox"
+
+      - name: List public repo's
+        uses: actions/github-script@v6
+        with:
+          script: |
+            github.rest.repos.listPublic();
 
       # - name: Validate password's existence
       #   if: inputs.deploy_jumpbox == 'true' && ( inputs.jumpbox_password_param_name == '' || inputs.jumpbox_password == '' )
