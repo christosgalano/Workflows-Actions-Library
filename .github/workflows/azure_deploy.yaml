@@ -82,7 +82,7 @@ jobs:
             --parameters ${{ inputs.template_prefix }}.parameters.json
 
   deploy-with-env:
-    name: Deploy infrastructure
+    name: Deploy ${{ inputs.environment }} infrastructure
     if: inputs.environment != ''
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}

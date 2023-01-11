@@ -42,7 +42,7 @@ on:
 
 jobs:
   deploy-plain:
-    name: Deploy infrastructure
+    name: Deploy ${{ inputs.environment }} infrastructure
     if: inputs.environment == ''
     runs-on: ubuntu-latest
     defaults:
