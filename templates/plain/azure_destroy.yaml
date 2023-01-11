@@ -1,0 +1,39 @@
+name: destroy-infra
+run-name: ${{ github.workflow }}
+on:
+  workflow_call:
+    inputs:
+      rg_name:
+        description: "Specify resource group name"
+        required: true
+        type: string
+      enable_harder_runner:
+        description: "Specify whether to enable the Harden Runner action (only on public repositories)"
+        required: true
+        type: boolean
+    secrets:
+      AZURE_CREDENTIALS:
+        required: true
+
+jobs:
+  destroy:
+    name: Destroy infrastructure
+    runs-on: ubuntu-latest
+    steps:
+      - name: Harden Runner
+        if: inputs.enable_harder_runner == 'true'
+        uses: step-security/harden-runner@v2.0.0
+        with:
+          disable-sudo: true
+          egress-policy: audit
+
+      - name: Azure login
+        uses: Azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Delete the resource group and all of its resources
+        uses: Azure/cli@v1
+        with:
+          inlineScript: |
+            az group delete -n ${{ inputs.rg_name }} -y

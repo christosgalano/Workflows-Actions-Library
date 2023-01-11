@@ -1,0 +1,73 @@
+name: checkov-scan
+run-name: ${{ github.workflow }}
+on:
+  workflow_call:
+    inputs:
+      template_dir:
+        description: "Specify repository path of the bicep directory"
+        required: true
+        type: string
+      template_prefix:
+        description: "Specify file prefix of the main bicep template"
+        required: true
+        type: string
+      enable_harder_runner:
+        description: "Specify whether to enable the Harden Runner action (only on public repositories)"
+        required: true
+        type: boolean
+
+jobs:
+  scan-and-publish:
+    name: Scan bicep and publish results
+    runs-on: ubuntu-latest
+    steps:
+      - name: Harden Runner
+        if: inputs.enable_harder_runner == 'true'
+        uses: step-security/harden-runner@v2.0.0
+        with:
+          disable-sudo: true
+          egress-policy: audit
+
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.8
+
+      # When testing the bicep templates directly, the modules are not included.
+      - name: Bicep build
+        uses: Azure/bicep-build-action@v1.0.0
+        with:
+          bicepFilePath: ${{ inputs.template_dir }}/${{ inputs.template_prefix }}.bicep
+          outputFilePath: ${{ inputs.template_dir }}/${{ inputs.template_prefix }}.json
+
+      - name: Scan with Checkov
+        uses: bridgecrewio/checkov-action@master
+        with:
+          file: ${{ inputs.template_dir }}/${{ inputs.template_prefix }}.json
+          framework: arm
+          soft_fail: false
+          output_format: junitxml
+
+      - name: Write results to file
+        if: always()
+        run: |
+          echo "$CHECKOV_RESULTS" > results.xml
+
+      - name: Upload results as artifact
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: scan-results
+          path: results.xml
+          retention-days: 30
+
+      - name: Publish scan results
+        uses: mikepenz/action-junit-report@v3
+        if: always()
+        with:
+          check_name: Checkov Scan Results
+          report_paths: results.xml
+          detailed_summary: true

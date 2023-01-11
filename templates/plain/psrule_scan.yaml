@@ -1,0 +1,68 @@
+name: psrule-scan
+run-name: ${{ github.workflow }}
+on:
+  workflow_call:
+    inputs:
+      template_dir:
+        description: "Specify repository path of the bicep directory"
+        required: true
+        type: string
+      template_prefix:
+        description: "Specify file prefix of the main bicep template"
+        required: true
+        type: string
+      enable_harder_runner:
+        description: "Specify whether to enable the Harden Runner action (only on public repositories)"
+        required: true
+        type: boolean
+
+jobs:
+  scan-and-publish:
+    name: Scan bicep and publish results
+    runs-on: ubuntu-latest
+    steps:
+      - name: Harden Runner
+        if: inputs.enable_harder_runner == 'true'
+        uses: step-security/harden-runner@v2.0.0
+        with:
+          disable-sudo: true
+          egress-policy: audit
+
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Bicep Build
+        uses: Azure/bicep-build-action@v1.0.0
+        with:
+          bicepFilePath: ${{ inputs.template_dir }}/${{ inputs.template_prefix }}.bicep
+          outputFilePath: ${{ inputs.template_dir }}/${{ inputs.template_prefix }}.json
+
+      - name: Run PSRule scan
+        uses: microsoft/ps-rule@v2.6.0
+        with:
+          modules: "PSRule.Rules.Azure"
+          inputPath: ${{ inputs.template_dir }}/${{ inputs.template_prefix }}*.json
+          outputFormat: NUnit3
+          outputPath: results.xml
+
+      - name: Upload results as artifact
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: scan-results
+          path: results.xml
+          retention-days: 30
+
+      - name: Publish scan results
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        if: always()
+        with:
+          check_name: PSRule Scan Results
+          nunit_files: results.xml
+          comment_mode: off
+          fail_on: test failures
+          action_fail: false
+          ignore_runs: false
+          job_summary: true
+          compare_to_earlier_commit: true
+          check_run_annotations: all tests, skipped tests

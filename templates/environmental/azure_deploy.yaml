@@ -1,0 +1,82 @@
+name: deploy-infra
+run-name: ${{ github.workflow }}
+on:
+  workflow_call:
+    inputs:
+      template_dir:
+        description: "Specify repository path of the bicep directory"
+        default: bicep
+        required: true
+        type: string
+      template_prefix:
+        description: "Specify file prefix of the main bicep template"
+        default: azure.deploy
+        required: true
+        type: string
+      environment:
+        description: "Specify environment to be reference from this workflow's jobs"
+        required: false
+        type: string
+      location:
+        description: "Specify the location to store the deployment metadata"
+        default: westeurope
+        required: true
+        type: string
+      deployment_name:
+        description: "Specify deployment name"
+        required: true
+        type: string
+      enable_harder_runner:
+        description: "Specify whether to enable the Harden Runner action (only on public repositories)"
+        required: true
+        type: boolean
+    secrets:
+      AZURE_CREDENTIALS:
+        required: true
+
+jobs:
+  deploy:
+    name: Deploy infrastructure
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Harden Runner
+        if: inputs.enable_harder_runner == 'true'
+        uses: step-security/harden-runner@v2.0.0
+        with:
+          disable-sudo: true
+          egress-policy: audit
+
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Azure login
+        uses: Azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Lint template
+        working-directory: ${{ github.workspace }}/${{ inputs.template_dir }}
+        run: |
+          az bicep build --file ${{ inputs.template_prefix }}.bicep
+
+      - name: Validate template
+        working-directory: ${{ github.workspace }}/${{ inputs.template_dir }}
+        run: |
+          az deployment sub validate \
+            --name "${{ inputs.deployment_name }}" \
+            --location "${{ inputs.location }}" \
+            --template-file ${{ inputs.template_prefix }}.bicep \
+            --parameters ${{ inputs.template_prefix }}.parameters.json
+
+      - name: Deploy template
+        working-directory: ${{ github.workspace }}/${{ inputs.template_dir }}
+        run: |
+          az deployment sub create \
+            --name "${{ inputs.deployment_name }}" \
+            --location "${{ inputs.location }}" \
+            --template-file ${{ inputs.template_prefix }}.bicep \
+            --parameters ${{ inputs.template_prefix }}.parameters.json
