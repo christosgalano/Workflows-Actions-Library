@@ -36,4 +36,5 @@ jobs:
         shell: pwsh
         run: |
           $resource_groups = az deployment sub show -n ${{ inputs.deployment_name }} --query properties.outputs.resource_groups.value | convertfrom-json
+          Write-Host $resource_groups
           $resource_groups | foreach { az group delete -n $_ -y --no-wait }
