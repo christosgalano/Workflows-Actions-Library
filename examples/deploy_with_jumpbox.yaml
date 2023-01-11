@@ -1,0 +1,34 @@
+name: deploy-infra
+run-name: ${{ github.workflow }}
+on:
+  workflow_dispatch:
+    inputs:
+      deployment_name:
+        description: "Specify deployment name"
+        default: efd-dev-deployment
+        required: true
+        type: string
+
+jobs:
+  call-psrule-scan-workflow:
+    permissions:
+      checks: write
+      contents: read
+    uses: christosgalano/Workflow-Templates/.github/workflows/psrule_scan.yaml@main
+    with:
+      template_dir: bicep
+      template_prefix: azure.deploy
+      enable_harder_runner: false
+
+  call-azure-deploy-workflow:
+    uses: christosgalano/Workflow-Templates/.github/workflows/azure_deploy_with_jumpbox.yaml@main
+    # needs: call-psrule-scan-workflow
+    with:
+      template_dir: bicep
+      template_prefix: azure.deploy
+      # environment: development # Optional. Specifies the environment to be referenced from the called workflow's jobs
+      jumpbox_password_param_name: jumpbox_admin_password
+      location: westeurope
+      deployment_name: ${{ inputs.deployment_name }}
+      enable_harder_runner: false
+    secrets: inherit

@@ -1,0 +1,33 @@
+name: deploy-infra
+run-name: ${{ github.workflow }}
+on:
+  workflow_dispatch:
+    inputs:
+      deployment_name:
+        description: "Specify deployment name"
+        required: true
+        type: string
+
+jobs:
+  call-psrule-scan-workflow:
+    permissions:
+      checks: write
+      contents: read
+    uses: christosgalano/Workflow-Templates/.github/workflows/psrule_scan.yaml@main
+    with:
+      template_dir: bicep
+      template_prefix: azure.deploy
+      enable_harder_runner: false
+
+  call-azure-deploy-workflow:
+    uses: christosgalano/Workflow-Templates/.github/workflows/azure_deploy.yaml@main
+    needs: call-psrule-scan-workflow
+    with:
+      template_dir: bicep
+      template_prefix: azure.deploy
+      # environment: development # Optional. Specifies the environment to be referenced from the called workflow's jobs
+      location: westeurope
+      deployment_name: ${{ inputs.deployment_name }}
+      enable_harder_runner: false
+    secrets:
+      AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}

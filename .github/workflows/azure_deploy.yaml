@@ -14,7 +14,7 @@ on:
         required: true
         type: string
       environment:
-        description: "Specify environment to be reference from this workflow's jobs"
+        description: "Specify environment to be referenced from this workflow's jobs"
         required: false
         type: string
       location:
