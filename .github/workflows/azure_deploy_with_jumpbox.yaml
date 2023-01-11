@@ -42,7 +42,7 @@ on:
 
 jobs:
   deploy-plain:
-    name: Deploy infrastructure - plain
+    name: Deploy infrastructure - no environment
     if: inputs.environment == ''
     runs-on: ubuntu-latest
     defaults:
@@ -90,7 +90,7 @@ jobs:
                          ${{ inputs.jumpbox_password_param_name }}="${{ secrets.ADMIN_PASSWORD }}"
 
   deploy-with-env:
-    name: Deploy infrastructure - ${{ inputs.environment }}
+    name: Deploy infrastructure - ${{ inputs.environment }} environment
     if: inputs.environment != ''
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
