@@ -13,6 +13,10 @@ on:
         default: azure.deploy
         required: true
         type: string
+      environment:
+        description: "Specify environment to be reference from this workflow's jobs"
+        required: false
+        type: string
       jumpbox_password_param_name:
         description: "Specify the parameter name for the jumpbox admin's password"
         required: true
@@ -40,6 +44,7 @@ jobs:
   deploy:
     name: Deploy infrastructure
     runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
     defaults:
       run:
         shell: bash
