@@ -33,11 +33,7 @@ jobs:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Delete all of the deployment's resource groups and their resources
-        uses: Azure/cli@v1
-        with:
-          inlineScript: |
-            resource_groups=$(az deployment sub show -n ${{ inputs.deployment_name }} --query properties.outputs.resource_groups.value)
-            for rg in $resource_groups
-            do
-              az group delete -n $rg -y --no-wait
-            done
+        shell: pwsh
+        run: |
+          $resource_groups = az deployment sub show -n ${{ inputs.deployment_name }} --query properties.outputs.resource_groups.value | convertfrom-json
+          $resource_groups | foreach { az group delete -n $_ -y --no-wait }
