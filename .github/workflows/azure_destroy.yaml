@@ -3,12 +3,12 @@ run-name: ${{ github.workflow }}
 on:
   workflow_call:
     inputs:
-      rg_name:
-        description: "Specify resource group name"
+      deployment_name:
+        description: "Specify deployment name. Must have an output named 'resource_groups' which is an array with the names of the resource groups' to be deleted."
         required: true
         type: string
       enable_harder_runner:
-        description: "Specify whether to enable the Harden Runner action (only on public repositories)"
+        description: "Specify whether to enable the Harden Runner action. Used only on public repositories."
         required: true
         type: boolean
     secrets:
@@ -32,8 +32,12 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Delete the resource group and all of its resources
+      - name: Delete all of the deployment's resource groups and their resources
         uses: Azure/cli@v1
         with:
           inlineScript: |
-            az group delete -n ${{ inputs.rg_name }} -y
+            resource_groups=$(az deployment sub show -n ${{ inputs.deployment_name }} --query properties.outputs.resource_groups.value)
+            for rg in $resource_groups
+            do
+              az group delete -n $rg -y --no-wait
+            done
