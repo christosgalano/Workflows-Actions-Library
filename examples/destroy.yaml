@@ -3,8 +3,8 @@ run-name: ${{ github.workflow }}
 on:
   workflow_dispatch:
     inputs:
-      rg_name:
-        description: "Specify resource group name"
+      deployment_name:
+        description: "Specify deployment name"
         required: true
         type: string
 
@@ -28,7 +28,7 @@ jobs:
     uses: christosgalano/Workflow-Templates/.github/workflows/azure_destroy.yaml@main
     needs: approve
     with:
-      rg_name: ${{ inputs.rg_name }}
+      deployment_name: ${{ inputs.deployment_name }} # ! The deployment must have an output named 'resource_groups' which is an array with the names of the resource groups' to be deleted.
       enable_harder_runner: false
     secrets:
       AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
