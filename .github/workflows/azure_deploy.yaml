@@ -1,3 +1,5 @@
+# This workflow deploys a bicep template to Azure.
+
 name: deploy-infra
 run-name: ${{ github.workflow }}
 on:

@@ -1,3 +1,5 @@
+# This workflow destroys a deployment's resource group/s and all of their resources.
+
 name: destroy-infra
 run-name: ${{ github.workflow }}
 on:

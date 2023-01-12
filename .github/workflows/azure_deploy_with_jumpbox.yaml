@@ -1,3 +1,5 @@
+# This workflow deploys a bicep template which includes a password-protected jumpbox virtual machine on Azure.
+
 name: deploy-infra
 run-name: ${{ github.workflow }}
 on:
