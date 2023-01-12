@@ -1,0 +1,9 @@
+{
+    "name": "Scan a bicep template using PSRule",
+    "description": "Scan a bicep template using PSRule and publish the results.",
+    "iconName": "azure",
+    "categories": [
+        "Bicep",
+        "code-quality"
+    ]
+}
