@@ -22,7 +22,7 @@ jobs:
 
   call-azure-deploy-workflow:
     uses: christosgalano/Workflow-Templates/.github/workflows/azure_deploy_with_jumpbox.yaml@main
-    # needs: call-psrule-scan-workflow
+    needs: call-psrule-scan-workflow
     with:
       template_dir: bicep
       template_prefix: azure.deploy
@@ -31,4 +31,6 @@ jobs:
       location: westeurope
       deployment_name: ${{ inputs.deployment_name }}
       enable_harder_runner: false
-    secrets: inherit
+    secrets:
+      ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
+      AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
