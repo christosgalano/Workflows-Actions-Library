@@ -66,7 +66,7 @@ jobs:
         if: success() || failure()
         with:
           name: psrule-scan-results
-          path: results.*
+          path: psrule-results-${{ github.run_number }}.*
           retention-days: 10
 
       - name: Upload sarif file
