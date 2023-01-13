@@ -75,7 +75,7 @@ jobs:
         uses: github/codeql-action/upload-sarif@v2
         with:
           sarif_file: results.sarif
-          category: psrule
+          category: checkov
 
       - name: Publish scan results
         if: (success() || failure()) && inputs.code_scanning_enabled == 'false'
