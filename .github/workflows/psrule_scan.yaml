@@ -13,6 +13,10 @@ on:
         description: "Specify file prefix of the main bicep template"
         required: true
         type: string
+      code_scanning_enabled:
+        description: "Specify whether to integrate with code scanning"
+        required: true
+        type: boolean
       enable_harder_runner:
         description: "Specify whether to enable the Harden Runner action (only on public repositories)"
         required: true
@@ -39,7 +43,17 @@ jobs:
           bicepFilePath: ${{ inputs.template_dir }}/${{ inputs.template_prefix }}.bicep
           outputFilePath: ${{ inputs.template_dir }}/${{ inputs.template_prefix }}.json
 
-      - name: Run PSRule scan
+      - name: Run PSRule scan - sarif
+        if: inputs.code_scanning_enabled == 'true'
+        uses: microsoft/ps-rule@v2.6.0
+        with:
+          modules: "PSRule.Rules.Azure"
+          inputPath: ${{ inputs.template_dir }}/${{ inputs.template_prefix }}*.json
+          outputFormat: sarif
+          outputPath: results.sarif
+
+      - name: Run PSRule scan - NUnit3
+        if: inputs.code_scanning_enabled == 'false'
         uses: microsoft/ps-rule@v2.6.0
         with:
           modules: "PSRule.Rules.Azure"
@@ -49,15 +63,22 @@ jobs:
 
       - name: Upload results as artifact
         uses: actions/upload-artifact@v3
-        if: always()
+        if: success() || failure()
         with:
           name: scan-results
-          path: results.xml
-          retention-days: 30
+          path: results.*
+          retention-days: 10
+
+      - name: Upload sarif file
+        if: (success() || failure()) && inputs.code_scanning_enabled == 'true'
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: results.sarif
+          category: psrule
 
       - name: Publish scan results
         uses: EnricoMi/publish-unit-test-result-action@v2
-        if: always()
+        if: (success() || failure()) && inputs.code_scanning_enabled == 'false'
         with:
           check_name: PSRule Scan Results
           nunit_files: results.xml

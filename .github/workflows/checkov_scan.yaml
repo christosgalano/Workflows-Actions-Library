@@ -1,9 +1,7 @@
-# This workflow scans a bicep template using Checkov and publishes the results.
-
 name: checkov-scan
 run-name: ${{ github.workflow }}
 on:
-  workflow_call:
+  workflow_dispatch:
     inputs:
       template_dir:
         description: "Specify repository path of the bicep directory"
@@ -13,6 +11,10 @@ on:
         description: "Specify file prefix of the main bicep template"
         required: true
         type: string
+      code_scanning_enabled:
+        description: "Specify whether to integrate with code scanning"
+        required: true
+        type: boolean
       enable_harder_runner:
         description: "Specify whether to enable the Harden Runner action (only on public repositories)"
         required: true
@@ -33,11 +35,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Set up Python 3.8
-        uses: actions/setup-python@v1
-        with:
-          python-version: 3.8
-
       # When testing the bicep templates directly, the modules are not included.
       - name: Bicep build
         uses: Azure/bicep-build-action@v1.0.0
@@ -45,41 +42,45 @@ jobs:
           bicepFilePath: ${{ inputs.template_dir }}/${{ inputs.template_prefix }}.bicep
           outputFilePath: ${{ inputs.template_dir }}/${{ inputs.template_prefix }}.json
 
-      - name: Scan with Checkov
+      - name: Run Checkov scan - sarif
+        if: inputs.code_scanning_enabled == 'true'
         uses: bridgecrewio/checkov-action@master
         with:
           file: ${{ inputs.template_dir }}/${{ inputs.template_prefix }}.json
           framework: arm
           soft_fail: false
-          output_format: sarif # junitxml
-          output_file_path: results1.sarif
+          output_format: sarif
+          output_file_path: results.sarif
 
-      - name: Write results to file
-        if: success() || failure()
-        run: |
-          echo "$CHECKOV_RESULTS" > results2.sarif
+      - name: Run Checkov scan - junitxml
+        if: inputs.code_scanning_enabled == 'false'
+        uses: bridgecrewio/checkov-action@master
+        with:
+          file: ${{ inputs.template_dir }}/${{ inputs.template_prefix }}.json
+          framework: arm
+          soft_fail: false
+          output_format: junitxml
+          output_file_path: results.xml
 
       - name: Upload results as artifact
         uses: actions/upload-artifact@v3
         if: success() || failure()
         with:
           name: scan-results
-          path: |
-            results1.sarif
-            results2.sarif
-          retention-days: 30
+          path: results.*
+          retention-days: 10
 
-      # - name: Publish scan results
-      #   uses: mikepenz/action-junit-report@v3
-      #   if: always()
-      #   with:
-      #     check_name: Checkov Scan Results
-      #     report_paths: results.xml
-      #     detailed_summary: true
-
-      - name: Upload SARIF file
-        if: success() || failure()
+      - name: Upload sarif file
+        if: (success() || failure()) && inputs.code_scanning_enabled == 'true'
         uses: github/codeql-action/upload-sarif@v2
         with:
-          sarif_file: results2.sarif
+          sarif_file: results.sarif
           category: psrule
+
+      - name: Publish scan results
+        if: (success() || failure()) && inputs.code_scanning_enabled == 'false'
+        uses: mikepenz/action-junit-report@v3
+        with:
+          check_name: Checkov Scan Results
+          report_paths: results.xml
+          detailed_summary: true
