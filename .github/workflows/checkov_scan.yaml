@@ -11,8 +11,8 @@ on:
         description: "Specify file prefix of the main bicep template"
         required: true
         type: string
-      code_scanning:
-        description: "Specify whether to integrate with code scanning (enabled/disabled)"
+      code_scanning_enabled:
+        description: "Specify whether to integrate with code scanning (true/false)"
         required: true
         type: string
       enable_harder_runner:
@@ -43,7 +43,7 @@ jobs:
           outputFilePath: ${{ inputs.template_dir }}/${{ inputs.template_prefix }}.json
 
       - name: Run Checkov scan - sarif
-        if: inputs.code_scanning_enabled == 'enabled'
+        if: inputs.code_scanning_enabled == 'true'
         uses: bridgecrewio/checkov-action@master
         with:
           file: ${{ inputs.template_dir }}/${{ inputs.template_prefix }}.json
@@ -53,7 +53,7 @@ jobs:
           output_file_path: results.sarif
 
       - name: Run Checkov scan - junitxml
-        if: inputs.code_scanning_enabled == 'disabled'
+        if: inputs.code_scanning_enabled == 'false'
         uses: bridgecrewio/checkov-action@master
         with:
           file: ${{ inputs.template_dir }}/${{ inputs.template_prefix }}.json
@@ -71,14 +71,14 @@ jobs:
           retention-days: 10
 
       - name: Upload sarif file
-        if: (success() || failure()) && inputs.code_scanning_enabled == 'enabled'
+        if: (success() || failure()) && inputs.code_scanning_enabled == 'true'
         uses: github/codeql-action/upload-sarif@v2
         with:
           sarif_file: results.sarif
           category: checkov
 
       - name: Publish scan results
-        if: (success() || failure()) && inputs.code_scanning_enabled == 'disabled'
+        if: (success() || failure()) && inputs.code_scanning_enabled == 'false'
         uses: mikepenz/action-junit-report@v3
         with:
           check_name: Checkov Scan Results

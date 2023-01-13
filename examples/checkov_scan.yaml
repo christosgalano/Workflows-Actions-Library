@@ -3,13 +3,10 @@ run-name: ${{ github.workflow }}
 on:
   workflow_dispatch:
     inputs:
-      code_scanning:
+      code_scanning_enabled:
         description: "Specify whether to integrate with code scanning"
         required: true
-        type: choice
-        options:
-          - "enabled"
-          - "disabled"
+        type: boolean
 
 jobs:
   call-checkov-scan-workflow:
@@ -22,5 +19,5 @@ jobs:
     with:
       template_dir: bicep
       template_prefix: azure.deploy
-      code_scanning: ${{ inputs.code_scanning }}
+      code_scanning_enabled: ${{ inputs.code_scanning_enabled }}
       enable_harder_runner: false
