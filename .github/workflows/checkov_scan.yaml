@@ -1,7 +1,7 @@
 name: checkov-scan
 run-name: ${{ github.workflow }}
 on:
-  workflow_dispatch:
+  workflow_call:
     inputs:
       template_dir:
         description: "Specify repository path of the bicep directory"
