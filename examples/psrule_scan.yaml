@@ -1,6 +1,9 @@
 name: psrule-scan
 run-name: ${{ github.workflow }}
 on:
+  push:
+    paths:
+      - "bicep/*.bicep"
   workflow_dispatch:
     inputs:
       code_scanning_enabled:
@@ -19,5 +22,5 @@ jobs:
     with:
       template_dir: bicep
       template_prefix: azure.deploy
-      code_scanning_enabled: ${{ inputs.code_scanning_enabled }}
+      code_scanning_enabled: ${{ inputs.code_scanning_enabled || 'false' }}
       enable_harder_runner: false
