@@ -50,7 +50,7 @@ jobs:
           framework: arm
           soft_fail: false
           output_format: sarif
-          output_file_path: checkov-results-${{ github.run_number }}.sarif
+          output_file_path: results/checkov-results-${{ github.run_number }}.sarif
 
       - name: Run Checkov scan - junitxml
         if: inputs.code_scanning_enabled == 'false'
@@ -60,21 +60,21 @@ jobs:
           framework: arm
           soft_fail: false
           output_format: junitxml
-          output_file_path: checkov-results-${{ github.run_number }}.xml
+          output_file_path: results/checkov-results-${{ github.run_number }}.xml
 
       - name: Upload results as artifact
         uses: actions/upload-artifact@v3
         if: success() || failure()
         with:
           name: checkov-scan-results
-          path: checkov-results-${{ github.run_number }}.*
+          path: results/checkov-results-${{ github.run_number }}.*
           retention-days: 10
 
       - name: Upload sarif file
         if: (success() || failure()) && inputs.code_scanning_enabled == 'true'
         uses: github/codeql-action/upload-sarif@v2
         with:
-          sarif_file: checkov-results-${{ github.run_number }}.sarif
+          sarif_file: results/checkov-results-${{ github.run_number }}.sarif
           category: checkov
 
       - name: Publish scan results
@@ -82,5 +82,5 @@ jobs:
         uses: mikepenz/action-junit-report@v3
         with:
           check_name: Checkov Scan Results
-          report_paths: checkov-results-${{ github.run_number }}.xml
+          report_paths: results/checkov-results-${{ github.run_number }}.xml
           detailed_summary: true
