@@ -50,7 +50,7 @@ jobs:
           modules: "PSRule.Rules.Azure"
           inputPath: ${{ inputs.template_dir }}/${{ inputs.template_prefix }}*.json
           outputFormat: sarif
-          outputPath: results.sarif
+          outputPath: psrule-results-${{ github.run_number }}.sarif
 
       - name: Run PSRule scan - NUnit3
         if: inputs.code_scanning_enabled == 'false'
@@ -59,13 +59,13 @@ jobs:
           modules: "PSRule.Rules.Azure"
           inputPath: ${{ inputs.template_dir }}/${{ inputs.template_prefix }}*.json
           outputFormat: NUnit3
-          outputPath: results.xml
+          outputPath: psrule-results-${{ github.run_number }}.xml
 
       - name: Upload results as artifact
         uses: actions/upload-artifact@v3
         if: success() || failure()
         with:
-          name: scan-results
+          name: psrule-scan-results
           path: results.*
           retention-days: 10
 
@@ -73,7 +73,7 @@ jobs:
         if: (success() || failure()) && inputs.code_scanning_enabled == 'true'
         uses: github/codeql-action/upload-sarif@v2
         with:
-          sarif_file: results.sarif
+          sarif_file: psrule-results-${{ github.run_number }}.sarif
           category: psrule
 
       - name: Publish scan results
@@ -81,7 +81,7 @@ jobs:
         if: (success() || failure()) && inputs.code_scanning_enabled == 'false'
         with:
           check_name: PSRule Scan Results
-          nunit_files: results.xml
+          nunit_files: psrule-results-${{ github.run_number }}.xml
           comment_mode: off
           fail_on: test failures
           action_fail: false
