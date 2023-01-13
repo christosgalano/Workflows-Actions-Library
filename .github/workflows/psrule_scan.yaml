@@ -14,9 +14,9 @@ on:
         required: true
         type: string
       code_scanning_enabled:
-        description: "Specify whether to integrate with code scanning"
+        description: "Specify whether to integrate with code scanning (true/false)"
         required: true
-        type: boolean
+        type: string
       enable_harder_runner:
         description: "Specify whether to enable the Harden Runner action (only on public repositories)"
         required: true
