@@ -51,25 +51,35 @@ jobs:
           file: ${{ inputs.template_dir }}/${{ inputs.template_prefix }}.json
           framework: arm
           soft_fail: false
-          output_format: junitxml
+          output_format: sarif # junitxml
+          output_file_path: results1.sarif
 
       - name: Write results to file
-        if: always()
+        if: success() || failure()
         run: |
-          echo "$CHECKOV_RESULTS" > results.xml
+          echo "$CHECKOV_RESULTS" > results2.sarif
 
       - name: Upload results as artifact
         uses: actions/upload-artifact@v3
-        if: always()
+        if: success() || failure()
         with:
           name: scan-results
-          path: results.xml
+          path: |
+            results1.sarif
+            results2.sarif
           retention-days: 30
 
-      - name: Publish scan results
-        uses: mikepenz/action-junit-report@v3
-        if: always()
+      # - name: Publish scan results
+      #   uses: mikepenz/action-junit-report@v3
+      #   if: always()
+      #   with:
+      #     check_name: Checkov Scan Results
+      #     report_paths: results.xml
+      #     detailed_summary: true
+
+      - name: Upload SARIF file
+        if: success() || failure()
+        uses: github/codeql-action/upload-sarif@v2
         with:
-          check_name: Checkov Scan Results
-          report_paths: results.xml
-          detailed_summary: true
+          sarif_file: results2.sarif
+          category: psrule
