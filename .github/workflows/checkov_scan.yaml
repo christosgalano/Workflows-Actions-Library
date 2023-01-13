@@ -50,7 +50,7 @@ jobs:
           framework: arm
           soft_fail: false
           output_format: sarif
-          output_file_path: "results-${{ github.run_id }}.sarif"
+          output_file_path: "results-${{ github.run_number }}.sarif"
 
       - name: Run Checkov scan - junitxml
         if: inputs.code_scanning_enabled == 'false'
@@ -60,7 +60,7 @@ jobs:
           framework: arm
           soft_fail: false
           output_format: junitxml
-          output_file_path: "results-${{ github.run_id }}.xml"
+          output_file_path: "results-${{ github.run_number }}.xml"
 
       - name: Write sarif results
         if: (success() || failure()) && inputs.code_scanning_enabled == 'true'
@@ -92,5 +92,5 @@ jobs:
         uses: mikepenz/action-junit-report@v3
         with:
           check_name: Checkov Scan Results
-          report_paths: "results-${{ github.run_id }}.xml"
+          report_paths: "results-${{ github.run_number }}.xml"
           detailed_summary: true
