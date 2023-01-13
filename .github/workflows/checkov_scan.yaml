@@ -62,10 +62,10 @@ jobs:
           output_format: junitxml
           output_file_path: "results-${{ github.run_id }}.xml"
 
-      # - name: Write sarif results
-      #   if: (success() || failure()) && inputs.code_scanning_enabled == 'true'
-      #   run: |
-      #     echo "$CHECKOV_RESULTS" > results.sarif
+      - name: Write sarif results
+        if: (success() || failure()) && inputs.code_scanning_enabled == 'true'
+        run: |
+          echo "$CHECKOV_RESULTS" > results.sarif
 
       # - name: Write junitxml results
       #   if: (success() || failure()) && inputs.code_scanning_enabled == 'false'
@@ -77,14 +77,14 @@ jobs:
         if: success() || failure()
         with:
           name: scan-results
-          path: results-*
+          path: results*
           retention-days: 10
 
       - name: Upload sarif file
         if: (success() || failure()) && inputs.code_scanning_enabled == 'true'
         uses: github/codeql-action/upload-sarif@v2
         with:
-          sarif_file: "results-${{ github.run_id }}.sarif"
+          sarif_file: results.sarif
           category: checkov
 
       - name: Publish scan results
