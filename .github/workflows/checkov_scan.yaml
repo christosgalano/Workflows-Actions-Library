@@ -11,10 +11,10 @@ on:
         description: "Specify file prefix of the main bicep template"
         required: true
         type: string
-      code_scanning_enabled:
-        description: "Specify whether to integrate with code scanning"
+      code_scanning:
+        description: "Specify whether to integrate with code scanning (enabled/disabled)"
         required: true
-        type: boolean
+        type: string
       enable_harder_runner:
         description: "Specify whether to enable the Harden Runner action (only on public repositories)"
         required: true
@@ -43,7 +43,7 @@ jobs:
           outputFilePath: ${{ inputs.template_dir }}/${{ inputs.template_prefix }}.json
 
       - name: Run Checkov scan - sarif
-        if: inputs.code_scanning_enabled == 'true'
+        if: inputs.code_scanning_enabled == 'enabled'
         uses: bridgecrewio/checkov-action@master
         with:
           file: ${{ inputs.template_dir }}/${{ inputs.template_prefix }}.json
@@ -53,7 +53,7 @@ jobs:
           output_file_path: results.sarif
 
       - name: Run Checkov scan - junitxml
-        if: inputs.code_scanning_enabled == 'false'
+        if: inputs.code_scanning_enabled == 'disabled'
         uses: bridgecrewio/checkov-action@master
         with:
           file: ${{ inputs.template_dir }}/${{ inputs.template_prefix }}.json
@@ -71,14 +71,14 @@ jobs:
           retention-days: 10
 
       - name: Upload sarif file
-        if: (success() || failure()) && inputs.code_scanning_enabled == 'true'
+        if: (success() || failure()) && inputs.code_scanning_enabled == 'enabled'
         uses: github/codeql-action/upload-sarif@v2
         with:
           sarif_file: results.sarif
           category: checkov
 
       - name: Publish scan results
-        if: (success() || failure()) && inputs.code_scanning_enabled == 'false'
+        if: (success() || failure()) && inputs.code_scanning_enabled == 'disabled'
         uses: mikepenz/action-junit-report@v3
         with:
           check_name: Checkov Scan Results
