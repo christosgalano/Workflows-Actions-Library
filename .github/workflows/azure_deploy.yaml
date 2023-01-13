@@ -1,4 +1,4 @@
-# This workflow deploys a bicep template to Azure.
+# This workflow deploys a bicep template on subscription scope to Azure.
 
 name: deploy-infra
 run-name: ${{ github.workflow }}
