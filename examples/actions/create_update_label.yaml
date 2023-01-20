@@ -1,0 +1,29 @@
+# This workflows updates a label specified (or creates one if it doesn't exist) in all of the user's repositories.
+name: create-update-label
+run-name: ${{ github.workflow }}
+on:
+  workflow_dispatch:
+    inputs:
+      name:
+        description: "Specify label name"
+        required: true
+        type: string
+      color:
+        description: "Specify label color"
+        required: true
+        type: string
+      description:
+        description: "Specify label description"
+        required: true
+        type: string
+
+jobs:
+  create-update-label:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: christosgalano/Workflows-Actions-Library/.github/actions/create-update-label@main
+        with:
+          name: ${{ inputs.name }}
+          color: ${{ inputs.color }}
+          description: ${{ inputs.description }}
+          token: ${{ secrets.GITHUB_PAT }}

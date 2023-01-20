@@ -1,0 +1,30 @@
+name: "Create/Update Label"
+author: "Christos Galanopoulos"
+description: "Create or update a label in all of the user's repositories"
+inputs:
+  name:
+    description: "Specify label name"
+    required: true
+  color:
+    description: "Specify label color"
+    required: true
+  description:
+    description: "Specify label description"
+    required: true
+  token:
+    description: "Specify GitHub Personal Access Token"
+    default: ${{ github.token }}
+    required: true
+branding:
+  icon: edit-2
+  color: gray-dark
+runs:
+  using: "composite"
+  steps:
+    - shell: bash
+      run: |
+        ${{ github.action_path }}/label.sh \
+          -n ${{ inputs.name }} \
+          -c ${{ inputs.color }} \
+          -d ${{ inputs.description }} \
+          -a ${{ inputs.token }}
