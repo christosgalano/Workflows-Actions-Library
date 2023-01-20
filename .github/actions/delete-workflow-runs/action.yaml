@@ -1,0 +1,25 @@
+name: "Delete Workflow Runs"
+author: "Christos Galanopoulos"
+description: "Delete the runs of all the workflows in a repository"
+inputs:
+  owner:
+    description: "Specify repository owner"
+    required: true
+  repo:
+    description: "Specify repository"
+    required: true
+  token:
+    description: "Specify GitHub Personal Access Token"
+    required: true
+branding:
+  icon: delete
+  color: gray-dark
+runs:
+  using: "composite"
+  steps:
+    - shell: bash
+      run: |
+        ${{ github.action_path }}/delete_workflow_runs.sh \
+          -o ${{ inputs.owner }} \
+          -r ${{ inputs.repo }} \
+          -a ${{ inputs.token }}
