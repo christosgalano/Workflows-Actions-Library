@@ -13,7 +13,6 @@ inputs:
     required: true
   token:
     description: "Specify GitHub Personal Access Token"
-    default: ${{ github.token }}
     required: true
 branding:
   icon: edit-2
@@ -23,7 +22,7 @@ runs:
   steps:
     - shell: bash
       run: |
-        ${{ github.action_path }}/label.sh \
+        ${{ github.action_path }}/create_update_label.sh \
           -n ${{ inputs.name }} \
           -c ${{ inputs.color }} \
           -d ${{ inputs.description }} \

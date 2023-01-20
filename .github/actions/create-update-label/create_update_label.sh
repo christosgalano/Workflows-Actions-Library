@@ -96,6 +96,7 @@ function update_label() {
 
 ### Script ###
 
+# Parse and validate parameters
 parse_params "$@"
 validate_params
 
@@ -109,7 +110,7 @@ https://api.github.com/user/repos | jq -r '.[].full_name')
 
 # Update the specified label in every repository.
 # If it does not exist then create it.
-for repo in $repos;
+for repo in $repos
 do
     update_label
 done
