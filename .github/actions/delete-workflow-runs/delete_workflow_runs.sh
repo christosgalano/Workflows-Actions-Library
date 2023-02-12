@@ -78,13 +78,13 @@ validate_params
 
 # List the runs of all the workflows and get their ids
 run_ids=( $(curl -s \
-    -H "Accept: application/vnd.github+json" \
-    -H "Authorization: Bearer $api_token" \
-    -H "X-GitHub-Api-Version: 2022-11-28" \
+        -H "Accept: application/vnd.github+json" \
+        -H "Authorization: Bearer $api_token" \
+        -H "X-GitHub-Api-Version: 2022-11-28" \
 https://api.github.com/repos/$owner/$repo/actions/runs | jq -r '.workflow_runs[].id') )
 
 # Delete all runs
-for id in $run_ids
+for id in ${run_ids[@]}
 do
     delete_run $id
 done
