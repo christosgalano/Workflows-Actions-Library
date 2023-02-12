@@ -66,7 +66,7 @@ function delete_run() {
     -H "Authorization: Bearer $api_token"\
     -H "X-GitHub-Api-Version: 2022-11-28" \
     https://api.github.com/repos/$owner/$repo/actions/runs/$1
-    printf "Successfully deleted a workflow's run with $1"
+    echo "Successfully deleted a workflow's run with $1"
 }
 
 

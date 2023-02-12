@@ -87,9 +87,9 @@ function update_label() {
     --output /dev/null)
     if [ "$status_code" -eq 404 ]; then
         create_label
-        printf "Successfully created $name label in $repo\n"
+        echo "Successfully created $name label in $repo"
     else
-        printf "Successfully updated $name label in $repo\n"
+        echo "Successfully updated $name label in $repo"
     fi
 }
 
