@@ -102,10 +102,10 @@ validate_params
 
 # Fetch all repositories and keep only their full names (user/repo)
 repos=( $(curl -s \
-        -H "Accept: application/vnd.github+json" \
-        -H "Authorization: Bearer $api_token" \
-        -H "X-GitHub-Api-Version: 2022-11-28" \
-https://api.github.com/user/repos | jq -r '.[].full_name') )
+    -H "Accept: application/vnd.github+json" \
+    -H "Authorization: Bearer $api_token" \
+    -H "X-GitHub-Api-Version: 2022-11-28" \
+    "https://api.github.com/user/repos" | jq -r '.[].full_name') )
 
 
 # Update the specified label in every repository.
