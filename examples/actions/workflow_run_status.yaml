@@ -1,0 +1,29 @@
+# This workflows gets the latest run status of a specified workflow.
+name: workflow-run-status
+run-name: ${{ github.workflow }}
+on:
+  workflow_dispatch:
+    inputs:
+      workflow:
+        type: string
+        required: true
+        description: "Name or ID of the workflow."
+      owner:
+        type: string
+        required: true
+        description: "Name of the repository's owner in which the workflow resides."
+      repo:
+        type: string
+        required: true
+        description: "Name of the repository in which the workflow resides."
+
+jobs:
+  workflow-run-status:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: christosgalano/Workflows-Actions-Library/.github/actions/workflow-run-status@main
+        with:
+          workflow: ${{ inputs.workflow }}
+          owner: ${{ inputs.owner }}
+          repo: ${{ inputs.repo }}
+          token: ${{ secrets.WORKFLOW_PAT }}

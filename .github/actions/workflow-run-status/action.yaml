@@ -1,0 +1,41 @@
+name: "Workflow Run Status"
+author: "Christos Galanopoulos"
+description: 'Get the status of the workflow''s latest run; if a new run is currently "queued" or "in_progress", wait until it completes.'
+inputs:
+  workflow:
+    description: "Name or ID of the workflow."
+    required: true
+  owner:
+    description: "Name of the repository's owner in which the workflow resides."
+    required: true
+  repo:
+    description: "Name of the repository in which the workflow resides."
+    required: true
+  token:
+    description: "GitHub Token; must have permissions to read the specified workflow's runs."
+    required: true
+branding:
+  icon: check-circle
+  color: green
+runs:
+  using: "composite"
+  steps:
+    # Get the status of the workflow's latest run.
+    # If a new run is currently `queued` or `in_progress`, wait until it completes.
+    - shell: bash
+      id: get-workflow-status
+      env:
+        WORKFLOW: ${{ inputs.workflow }}
+        REPO: ${{ inputs.owner }}/${{ inputs.repository }}
+        GITHUB_TOKEN: ${{ inputs.token }}
+      run: |
+        status=$(gh run list --workflow ${{ env.WORKFLOW }} --limit 1 --repo ${{ env.REPO }} | awk '{print $1}')
+        echo "Current ${{ env.WORKFLOW }} workflow status: $status"
+        while [ "$status" == "queued" ] || [ "$status" == "in_progress" ]; do
+          status=$(gh run list --workflow ${{ env.WORKFLOW }} --limit 1 --repo ${{ env.REPO }} | awk '{print $1}')
+          echo "Current ${{ env.WORKFLOW }} workflow status: $status"
+          sleep 5s
+        done
+        workflow_conclusion=$(gh run list --workflow ${{ env.WORKFLOW }} --repo ${{ env.REPO }} | grep -oh "completed.*" | head -1 | awk '{print $2}')
+        echo "Latest run of ${{ env.WORKFLOW }} workflow status: $workflow_conclusion"
+        echo "workflow-run-status=$workflow_run_status" >> $GITHUB_OUTPUT
