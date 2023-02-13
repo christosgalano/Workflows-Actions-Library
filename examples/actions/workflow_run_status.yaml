@@ -12,7 +12,7 @@ on:
         type: string
         required: true
         description: "Name of the repository's owner in which the workflow resides."
-      repo:
+      repository:
         type: string
         required: true
         description: "Name of the repository in which the workflow resides."
@@ -25,5 +25,5 @@ jobs:
         with:
           workflow: ${{ inputs.workflow }}
           owner: ${{ inputs.owner }}
-          repo: ${{ inputs.repo }}
+          repository: ${{ inputs.repository }}
           token: ${{ secrets.WORKFLOW_PAT }}
