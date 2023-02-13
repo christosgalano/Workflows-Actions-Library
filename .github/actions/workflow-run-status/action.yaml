@@ -14,6 +14,10 @@ inputs:
   token:
     description: "GitHub Token; must have permissions to read the specified workflow's runs."
     required: true
+outputs:
+  workflow-run-status:
+    description: "Status of the specified workflow''s latest run"
+    value: ${{ steps.get-workflow-status.outputs.workflow-run-status }}
 branding:
   icon: check-circle
   color: green
