@@ -8,22 +8,35 @@ on:
         type: string
         required: true
         description: "Name or ID of the workflow."
-      owner:
-        type: string
-        required: true
-        description: "Name of the repository's owner in which the workflow resides."
-      repository:
-        type: string
-        required: true
-        description: "Name of the repository in which the workflow resides."
+
+permissions:
+  actions: read
+  contents: read
 
 jobs:
   workflow-run-status:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
     steps:
-      - uses: christosgalano/Workflows-Actions-Library/.github/actions/workflow-run-status@main
+      - name: Get repository's name
+        id: get-repo-name
+        run: |
+          repo_name="$(cut -d '/' -f 2 <<< "${{ github.repository }}" )";
+          echo "repo-name=$repo_name" >> $GITHUB_OUTPUT
+
+      # Workflow must belong in this repository since we use the GITHUB_TOKEN.
+      # If you wish to poll the latest run of a workflow that resides in another repository,
+      # then create a secret containing a GitHUb PAT with the necessary permissions and use that one.
+      - name: Get workflow's latest run status
+        uses: christosgalano/Workflows-Actions-Library/.github/actions/workflow-run-status@main
+        id: get-run-status
         with:
           workflow: ${{ inputs.workflow }}
-          owner: ${{ inputs.owner }}
-          repository: ${{ inputs.repository }}
-          token: ${{ secrets.WORKFLOW_PAT }}
+          owner: ${{ github.repository_owner }}
+          repository: ${{ steps.get-repo-name.outputs.repo-name }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Print workflow's latest run status
+        run: echo ${{ steps.get-run-status.outputs.workflow-run-status }}
