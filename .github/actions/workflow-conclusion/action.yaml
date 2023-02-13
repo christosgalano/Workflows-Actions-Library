@@ -17,7 +17,7 @@ inputs:
 outputs:
   workflow-conclusion:
     description: "Conclusion of the specified workflow''s latest run"
-    value: ${{ steps.get-workflow-conclusion.outputs.workflow-run-conclusion }}
+    value: ${{ steps.get-conclusion.outputs.workflow-conclusion }}
 branding:
   icon: check-circle
   color: green
@@ -27,7 +27,7 @@ runs:
     # Get the conclusion of the workflow's latest run.
     # If a new run is currently `queued` or `in_progress`, wait until it completes.
     - shell: bash
-      id: get-workflow-conclusion
+      id: get-conclusion
       env:
         WORKFLOW: ${{ inputs.workflow }}
         REPO: ${{ inputs.owner }}/${{ inputs.repository }}
