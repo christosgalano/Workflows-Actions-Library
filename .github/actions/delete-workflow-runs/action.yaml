@@ -18,8 +18,12 @@ runs:
   using: "composite"
   steps:
     - shell: bash
+      env:
+        OWNER: ${{ inputs.owner }}
+        REPO: ${{ inputs.repo }}
+        TOKEN: ${{ inputs.token }}
       run: |
         ${{ github.action_path }}/delete_workflow_runs.sh \
-          -o ${{ inputs.owner }} \
-          -r ${{ inputs.repo }} \
-          -a ${{ inputs.token }}
+          -o ${{ env.OWNER }} \
+          -r ${{ env.REPO }} \
+          -t ${{ env.TOKEN }}

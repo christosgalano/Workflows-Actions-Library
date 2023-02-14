@@ -4,20 +4,20 @@
 
 # Dispaly help message
 function display_help() {
-    echo "Usage: $0 -n name -c color -d description -a api_token"
+    echo "Usage: $0 -n name -c color -d description -t api_token"
     echo ""
     echo "Options:"
     echo " -n, --name          specify label name         (required)"
     echo " -c, --color         specify label color        (required)"
     echo " -d, --description   specify label description  (required)"
-    echo " -a, --api-token     specify api token          (required)"
+    echo " -t, --api-token     specify api token          (required)"
     echo " -h, --help          display this help message and exit"
     echo ""
 }
 
 # Parse input
 function parse_params() {
-    TEMP=`getopt -o n:c:d:a:h --long name:,color:,description:,api-token:,help -n 'parse_params' -- "$@"`
+    TEMP=`getopt -o n:c:d:t:h --long name:,color:,description:,api-token:,help -n 'parse_params' -- "$@"`
     eval set -- "$TEMP"
     while true; do
         case "$1" in
@@ -33,7 +33,7 @@ function parse_params() {
                 description="$2"
                 shift 2
             ;;
-            -a|--api-token)
+            -t|--api-token)
                 api_token="$2"
                 shift 2
             ;;
@@ -57,7 +57,7 @@ function parse_params() {
 # Check if all required options are provided
 function validate_params() {
     if [ -z "$name" ] || [ -z "$color" ] || [ -z "$description" ] || [ -z "$api_token" ]; then
-        echo "Error: All options -n, -c, -d, -a are required"
+        echo "Error: All options -n, -c, -d, -t are required"
         display_help
         exit 1
     fi
@@ -102,10 +102,10 @@ validate_params
 
 # Fetch all repositories and keep only their full names (user/repo)
 repos=( $(curl -s \
-    -H "Accept: application/vnd.github+json" \
-    -H "Authorization: Bearer $api_token" \
-    -H "X-GitHub-Api-Version: 2022-11-28" \
-    "https://api.github.com/user/repos" | jq -r '.[].full_name') )
+        -H "Accept: application/vnd.github+json" \
+        -H "Authorization: Bearer $api_token" \
+        -H "X-GitHub-Api-Version: 2022-11-28" \
+"https://api.github.com/user/repos" | jq -r '.[].full_name') )
 
 
 # Update the specified label in every repository.

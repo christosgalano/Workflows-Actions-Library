@@ -21,9 +21,14 @@ runs:
   using: "composite"
   steps:
     - shell: bash
+      env:
+        NAME: ${{ inputs.name }}
+        COLOR: ${{ inputs.color }}
+        DESCRIPTION: ${{ inputs.description }}
+        TOKEN: ${{ inputs.token }}
       run: |
         ${{ github.action_path }}/create_update_label.sh \
-          -n ${{ inputs.name }} \
-          -c ${{ inputs.color }} \
-          -d ${{ inputs.description }} \
-          -a ${{ inputs.token }}
+          -n ${{ env.NAME }} \
+          -c ${{ env.COLOR }} \
+          -d ${{ env.DESCRIPTION }} \
+          -t ${{ env.TOKEN }}
